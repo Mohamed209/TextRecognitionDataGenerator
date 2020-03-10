@@ -17,19 +17,22 @@ from joblib import Parallel, delayed
 import pyarabic.araby as araby
 import string
 from multiprocessing import Pool
-letters = araby.LETTERS+string.printable+u'٠ ١ ٢ ٣ ٤ ٥ ٦ ٧ ٨ ٩'
+from string import punctuation, digits, whitespace, ascii_letters
+arabic_letters = araby.LETTERS+u'٠١٢٣٤٥٦٧٨٩'+punctuation+digits+whitespace
+english_letters = ascii_letters+digits+whitespace+punctuation
 SHADOW_DISTRIBUTION = [1, 0]
-SHADOW_WEIGHT = [0.3, 0.7]
+SHADOW_WEIGHT = [0.4, 0.6]
 INV_DISTRIBUTION = [1, 0]
 INV_WEIGHT = [0.3, 0.7]
 FIT = False
-SAVE_PATH = 'dataset/generated_data/'
+ARA_SAVE_PATH = 'dataset/generated_data/arabic/'
+ENG_SAVE_PATH = 'dataset/generated_data/english/'
 ara_lines = []
 eng_lines = []
 ara_lines_no_res = []
 mixed_lines = []
 mixed_lines_no_res = []
-text_size = [70, 80, 90]
+text_size = [50, 60, 70]
 blur = [0, 1]
 skewing_angle = [0, 1, 2]
 background_type = [0, 1, 2]
@@ -58,7 +61,7 @@ def generate_english_lines():
         for line in tqdm(f.readlines()):
             if line.strip():
                 for ch in list(set(line)):
-                    if ch not in letters:
+                    if ch not in english_letters:
                         flag = True
                         print("unwanted char ", ch)
                         break
@@ -75,7 +78,7 @@ def generate_mixed_lines():
         for line in tqdm(f.readlines()):
             if line.strip():
                 for ch in list(set(line)):
-                    if ch not in letters:
+                    if ch not in arabic_letters:
                         flag = True
                         print("unwanted char ", ch)
                         break
@@ -95,12 +98,12 @@ def generate_mixed_lines():
 create N generators and randomly select one for each iteration
 '''
 ####################################################################
-generate_mixed_lines()
+# generate_mixed_lines()
 generate_english_lines()
 english_generator = GeneratorFromStrings(
     strings=eng_lines,
     language='en',
-    count=150000,
+    count=150,
     size=np.random.choice(text_size),
     distorsion_type=np.random.choice(distorsion_type),
     skewing_angle=np.random.choice(skewing_angle),
@@ -111,7 +114,7 @@ english_generator = GeneratorFromStrings(
 mixed_generator = GeneratorFromStrings(
     strings=mixed_lines,
     language='mix',
-    count=150000,
+    count=150,
     size=np.random.choice(text_size),
     distorsion_type=np.random.choice(distorsion_type),
     skewing_angle=np.random.choice(skewing_angle),
@@ -128,8 +131,8 @@ def save_eng_lines(img, lbl):
         img = invert(img)
     img = img.resize((432, 32), Image.ANTIALIAS)
     ID = str(uuid.uuid4())
-    img.save(SAVE_PATH+ID+'.png')
-    with open(SAVE_PATH+ID+'.txt', 'w', encoding='utf-8') as label:
+    img.save(ENG_SAVE_PATH+ID+'.png')
+    with open(ENG_SAVE_PATH+ID+'.txt', 'w', encoding='utf-8') as label:
         label.writelines(lbl)
 
 
@@ -140,15 +143,15 @@ def save_mixed_lines(img, lbl):
         img = invert(img)
     img = img.resize((432, 32), Image.ANTIALIAS)
     ID = str(uuid.uuid4())
-    img.save(SAVE_PATH+ID+'.png')
-    with open(SAVE_PATH+ID+'.txt', 'w', encoding='utf-8') as label:
+    img.save(ARA_SAVE_PATH+ID+'.png')
+    with open(ARA_SAVE_PATH+ID+'.txt', 'w', encoding='utf-8') as label:
         label.writelines(mixed_lines_no_res[mixed_lines.index(lbl)])
 
 
 if __name__ == "__main__":
-    with Pool() as pool:
-        pool.starmap(save_mixed_lines, [(img, lbl)
-                                        for (img, lbl) in tqdm(mixed_generator)])
+    # with Pool() as pool:
+    #     pool.starmap(save_mixed_lines, [(img, lbl)
+    #                                     for (img, lbl) in tqdm(mixed_generator)])
     with Pool() as pool:
         pool.starmap(save_eng_lines, [(img, lbl)
                                       for (img, lbl) in tqdm(english_generator)])

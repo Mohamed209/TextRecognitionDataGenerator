@@ -3,11 +3,16 @@ import numpy as np
 import h5py
 import cv2
 import os
+import sys
 import string
 import pyarabic.araby as araby
-
+from string import punctuation, digits, whitespace, ascii_letters
+language = sys.argv[1]
 # utils
-letters = araby.LETTERS+string.printable+'٠ ١ ٢ ٣ ٤ ٥ ٦ ٧ ٨ ٩'
+if language == 'arabic':
+    letters = araby.LETTERS+u'٠١٢٣٤٥٦٧٨٩'+punctuation+digits+whitespace
+else:
+    letters = ascii_letters+digits+whitespace+punctuation
 
 
 def labels_to_text(labels):
@@ -22,7 +27,7 @@ def text_to_labels(text):
 img_h = 32
 img_w = 432
 downsample_factor = 4
-DATA_PATH = '../dataset/generated_data/'
+DATA_PATH = '../dataset/generated_data/'+language+'/'
 data = sorted(os.listdir(DATA_PATH))
 images = np.zeros(shape=(len(data)//2, img_h, img_w, 1))
 label_length = np.zeros((len(data)//2, 1), dtype=np.int)
@@ -64,7 +69,7 @@ print("input length >>", input_length.shape)
 print("label length>>", label_length.shape)
 
 # save np arrays to hard disk so as not to generate them from scratch in the begining of each training session
-h5 = h5py.File('../dataset/dataset.h5', 'w')
+h5 = h5py.File('../dataset/'+language+'_'+'dataset.h5', 'w')
 h5.create_dataset('images', data=images)
 h5.create_dataset('text', data=gt_padded_txt)
 h5.create_dataset('input_length', data=input_length)
