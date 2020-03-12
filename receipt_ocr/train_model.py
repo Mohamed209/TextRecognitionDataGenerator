@@ -185,8 +185,8 @@ checkpoint=ModelCheckpoint(
     filepath='ckpts/'+language+'CRNN--{epoch:02d}--{val_loss:.3f}.hdf5', monitor='val_loss', verbose=1, mode='min', period=5)
 train_model.fit_generator(generator=train_data_generator(),
                           validation_data=test_data_generator(),
-                          steps_per_epoch=240000//128,
-                          validation_steps=60000//128,
+                          steps_per_epoch=200000//128,
+                          validation_steps=50000//128,
                           epochs=epochs,
                           verbose=1,
                           callbacks=[checkpoint])
