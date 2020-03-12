@@ -35,8 +35,8 @@ mixed_lines_no_res = []
 text_size = [50, 60, 70]
 blur = [0, 1]
 skewing_angle = [0, 1, 2]
-background_type = [0, 1, 2]
-distorsion_type = [0, 2, 3]
+background_type = [1, 0, 2]
+distorsion_type = [2, 0, 3]
 text_color = ["#000000", "#282828", "#505050"]
 
 
