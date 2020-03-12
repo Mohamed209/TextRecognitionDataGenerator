@@ -59,8 +59,7 @@ def train_data_generator(img_w=432, img_h=32, no_channels=1, text_max_len=40, ba
         images=np.zeros((batch_size, img_h, img_w, no_channels))
         text=np.zeros((batch_size, text_max_len))
         label_length=np.zeros((batch_size, 1), dtype=np.int)
-        input_length=np.ones((batch_size, 1)) *
-            (img_w // 2)
+        input_length=np.ones((batch_size, 1)) * (img_w // 2)
         # choose randomly 32 samples of training data from hard disk and load them into memory
         i=0
         samples_indexes=np.random.choice(train_indexes, size=batch_size)
