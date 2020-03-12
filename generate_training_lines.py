@@ -16,12 +16,20 @@ from tqdm import tqdm
 from joblib import Parallel, delayed
 import pyarabic.araby as araby
 import string
-from multiprocessing import Pool
+import sys
 from string import punctuation, digits, whitespace, ascii_letters
-arabic_letters = araby.LETTERS+u'٠١٢٣٤٥٦٧٨٩'+punctuation+digits+whitespace
-english_letters = ascii_letters+digits+whitespace+punctuation
+from multiprocessing import Pool
+
+language = sys.argv[1]
+if language == 'arabic':
+    letters = araby.LETTERS+u'٠١٢٣٤٥٦٧٨٩'+punctuation+digits+whitespace
+elif language == 'english':
+    letters = letters = ascii_letters+digits+whitespace+punctuation
+else:
+    raise Exception("unsupported language")
+
 SHADOW_DISTRIBUTION = [1, 0]
-SHADOW_WEIGHT = [0.4, 0.6]
+SHADOW_WEIGHT = [0.3, 0.7]
 INV_DISTRIBUTION = [1, 0]
 INV_WEIGHT = [0.3, 0.7]
 FIT = False
@@ -35,7 +43,7 @@ mixed_lines_no_res = []
 text_size = [50, 60, 70]
 blur = [0, 1]
 skewing_angle = [0, 1, 2]
-background_type = [1, 0, 2]
+background_type = [2, 0, 2]
 distorsion_type = [2, 0, 3]
 text_color = ["#000000", "#282828", "#505050"]
 
@@ -61,9 +69,9 @@ def generate_english_lines():
         for line in tqdm(f.readlines()):
             if line.strip():
                 for ch in list(set(line)):
-                    if ch not in english_letters:
+                    if ch not in letters:
                         flag = True
-                        print("unwanted char ", ch)
+                        print("unwanted "+language+" char ", ch)
                         break
                 if flag:
                     flag = False
@@ -78,9 +86,9 @@ def generate_mixed_lines():
         for line in tqdm(f.readlines()):
             if line.strip():
                 for ch in list(set(line)):
-                    if ch not in arabic_letters:
+                    if ch not in letters:
                         flag = True
-                        print("unwanted char ", ch)
+                        print("unwanted "+language+" char ", ch)
                         break
                 if flag:
                     flag = False
@@ -93,17 +101,13 @@ def generate_mixed_lines():
             mixed_lines[i] = get_display(mixed_lines[i])
 
 
-####################################################################
-'''
-create N generators and randomly select one for each iteration
-'''
-####################################################################
-# generate_mixed_lines()
+generate_mixed_lines()
 generate_english_lines()
+
 english_generator = GeneratorFromStrings(
     strings=eng_lines,
     language='en',
-    count=150,
+    count=250000,
     size=np.random.choice(text_size),
     distorsion_type=np.random.choice(distorsion_type),
     skewing_angle=np.random.choice(skewing_angle),
@@ -114,7 +118,7 @@ english_generator = GeneratorFromStrings(
 mixed_generator = GeneratorFromStrings(
     strings=mixed_lines,
     language='mix',
-    count=150,
+    count=250000,
     size=np.random.choice(text_size),
     distorsion_type=np.random.choice(distorsion_type),
     skewing_angle=np.random.choice(skewing_angle),
@@ -149,9 +153,9 @@ def save_mixed_lines(img, lbl):
 
 
 if __name__ == "__main__":
-    # with Pool() as pool:
-    #     pool.starmap(save_mixed_lines, [(img, lbl)
-    #                                     for (img, lbl) in tqdm(mixed_generator)])
+    with Pool() as pool:
+        pool.starmap(save_mixed_lines, [(img, lbl)
+                                        for (img, lbl) in tqdm(mixed_generator)])
     with Pool() as pool:
         pool.starmap(save_eng_lines, [(img, lbl)
                                       for (img, lbl) in tqdm(english_generator)])
