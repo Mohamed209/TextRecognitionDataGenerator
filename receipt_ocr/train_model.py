@@ -7,7 +7,7 @@ import keras.backend as K
 from keras import optimizers
 from keras.activations import relu, sigmoid, softmax
 from keras.models import Model
-from keras.layers import Dense, LSTM, Reshape, BatchNormalization, Input, Conv2D, MaxPooling2D, Lambda, Bidirectional
+from keras.layers import Dense, LSTM, Reshape, BatchNormalization, Input, Conv2D, MaxPooling2D, Lambda, Bidirectional ,ZeroPadding2D
 from keras.preprocessing.sequence import pad_sequences
 from keras.models import load_model
 import numpy as np
