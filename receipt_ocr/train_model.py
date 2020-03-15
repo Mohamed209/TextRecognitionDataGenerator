@@ -139,8 +139,8 @@ conv_7=Conv2D(512, (2, 2), activation='relu')(pool_6)
 squeezed=Lambda(lambda x: K.squeeze(x, 1))(conv_7)
 # bidirectional LSTM layers with units=256
 blstm_1=Bidirectional(
-    LSTM(256, return_sequences=True, dropout=0.2))(squeezed)
-blstm_2=Bidirectional(LSTM(256, return_sequences=True, dropout=0.2))(blstm_1)
+    LSTM(512, return_sequences=True, dropout=0.2))(squeezed)
+blstm_2=Bidirectional(LSTM(512, return_sequences=True, dropout=0.2))(blstm_1)
 #blstm_3=Bidirectional(LSTM(256, return_sequences=True, dropout=0.2))(blstm_2)
 ################################################################################
 outputs=Dense(len(letters)+1, activation='softmax')(blstm_2)
